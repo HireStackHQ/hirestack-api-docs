@@ -19,7 +19,7 @@ info:
   title: HireStack API
   termsOfService: http://hirestack.ai/terms
   contact:
-    email: calum@hirestack.ai
+    email: developer@hirestack.ai
     name: HireStack Developers
     x-twitter: hirestack_hq
   license:
@@ -30,6 +30,8 @@ info:
 tags:
   - name: Job
     description: A job that an applicat will apply to
+  - name: Candidate
+    description: A candidate that may apply for one or more jobs within the workspace
 paths:
   /jobs:
     post:
@@ -155,11 +157,6 @@ paths:
       description: "Deletes the job permanently, this cannot be undone."
       operationId: deleteJob
       parameters:
-#         - name: api_key
-#           in: header
-#           required: false
-#           schema:
-#             type: string
         - name: jobId
           in: path
           description: Job id to delete
@@ -171,6 +168,106 @@ paths:
         "200":
             description: successful operation
             $ref: "#/components/responses/JobResponse"
+        "400":
+          description: Invalid ID supplied
+        "404":
+          description: Job not found
+  /candidates:
+    post: 
+      tags:
+          - Candidate
+      summary: Create a candidate
+      description: ""
+      operationId: createCandidate
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - title
+                - workspaceId
+              properties:
+                name:
+                  description: Name of candidate
+                  type: string
+                workspaceId: 
+                  description: ID for the workspace
+                  type: string
+                  format: uuid
+                jobId: 
+                  description: ID for the job the candidate will be applying for
+                  type: string
+                  format: uuid
+                experience:
+                  description: Years of experience of the candidate
+                  type: number
+                  format: int
+      responses:
+        "200":
+          description: successful operation
+          $ref: "#/components/responses/CandidateResponse"
+        "403":
+          description: Permission denied
+          content:
+            application/json:
+                schema:
+                  $ref: "#/components/schemas/ErrorResponse"
+    get:
+      tags:
+        - Candidate
+      summary: List candidates
+      description: ""
+      operationId: listCandidates
+      responses:
+        "200":
+          description: successful operation
+          $ref: "#/components/responses/CandidateArrayResponse"
+        "400":
+          description: Invalid ID supplied
+        "404":
+          description: Candidate not found
+  "/candidates/{candidateId}":
+    get:
+      tags:
+        - Candidate
+      summary: Get a candidate
+      description: Returns a single candidate
+      operationId: getCandidate
+      parameters:
+        - name: candidateId
+          in: path
+          description: ID of candidate to return
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        "200":
+          description: successful operation
+          $ref: "#/components/responses/CandidateResponse"
+        "400":
+          description: Invalid ID supplied
+        "404":
+          description: Job not found
+    delete:
+      tags:
+        - Candidate
+      summary: Delete a candidate
+      description: "Deletes the candidate permanently, this cannot be undone."
+      operationId: deleteCandidate
+      parameters:
+        - name: candidateId
+          in: path
+          description: Candidate id to delete
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        "200":
+            description: successful operation
+            $ref: "#/components/responses/CandidateResponse"
         "400":
           description: Invalid ID supplied
         "404":
@@ -208,6 +305,20 @@ components:
             items:
               $ref: "#/components/schemas/Job"
       description: List of job objects
+    CandidateResponse:
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/Candidate"
+      description: A candidate object
+    CandidateArrayResponse:
+      content:
+        application/json:
+          schema:
+            type: array
+            items:
+              $ref: "#/components/schemas/Candidate"
+      description: List of candidate objects
   schemas:
     Job:
       type: object
@@ -243,6 +354,19 @@ components:
         - active
         - inactive
         - deleted
+    Candidate:
+      type: object
+      required:
+        - id
+      properties:
+        id:
+          type: string
+          format: uuid
+        workspace:
+          $ref: "#/components/schemas/Workspace"
+        name:
+          type: string
+          example: Pepper Potts
     Workspace:
       type: object
       required:
