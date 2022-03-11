@@ -1,0 +1,270 @@
+openapi: 3.0.0
+info:
+  description: |
+    # Introduction
+
+    The HireStack API allows you to manage your video interviews and related resources 
+    in a simple, programmatic way using conventional REST HTTP requests.
+
+    All of the functionality that you are familiar with in the HireStack
+    app is also available through the API, allowing you to script the
+    complex actions that your situation requires.
+
+    The API documentation will start with a general overview about the design
+    and technology that has been implemented, followed by reference information
+    about specific endpoints.
+
+    
+  version: 1.0.0
+  title: HireStack API
+  termsOfService: http://hirestack.ai/terms
+  contact:
+    email: calum@hirestack.ai
+    name: HireStack Developers
+    x-twitter: hirestack_hq
+  license:
+    name: MIT
+    url: https://opensource.org/licenses/MIT
+  x-logo:
+    url: 'https://hirestack.ai/logo.png'
+tags:
+  - name: Job
+    description: A job that an applicat will apply to
+paths:
+  /jobs:
+    post:
+      tags:
+        - Job
+      summary: Create a job
+      description: ""
+      operationId: createJob
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - title
+                - workspaceId
+              properties:
+                title:
+                  description: Job title for the job
+                  type: string
+                workspaceId: 
+                  description: ID for the workspace
+                  type: string
+                  format: uuid
+                status:
+                  $ref: "#/components/schemas/JobStatus"
+                experience:
+                  type: number
+                  format: int
+                  description: Desired number of years experience for the candidate
+                  example: 6
+                
+      responses:
+        "200":
+          description: successful operation
+          $ref: "#/components/responses/JobResponse"
+        "403":
+          description: Permission denied
+          content:
+            application/json:
+                schema:
+                  $ref: "#/components/schemas/ErrorResponse"
+
+    get:
+      tags:
+        - Job
+      summary: List jobs
+      description: ""
+      operationId: listJobs
+      responses:
+        "200":
+          description: successful operation
+          $ref: "#/components/responses/JobArrayResponse"
+        "400":
+          description: Invalid ID supplied
+        "404":
+          description: Job not found
+  "/jobs/{jobId}":
+    get:
+      tags:
+        - Job
+      summary: Get a job
+      description: Returns a single job
+      operationId: getJob
+      parameters:
+        - name: jobId
+          in: path
+          description: ID of job to return
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        "200":
+          description: successful operation
+          $ref: "#/components/responses/JobResponse"
+        "400":
+          description: Invalid ID supplied
+        "404":
+          description: Job not found
+    put:
+      tags:
+        - Job
+      summary: Update a job
+      description: ""
+      operationId: updateJob
+      parameters:
+        - name: jobId
+          in: path
+          description: ID of job to be updated
+          required: true
+          schema:
+            type: string
+            format: uuid
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                title:
+                  description: Updated name of the job
+                  type: string
+                status:
+                  description: Updated status of the job
+                  $ref: "#/components/schemas/JobStatus"
+                experience:
+                  description: Update the desired years of experience for candidates
+                  type: string
+                  format: uuid
+      responses:
+        "200":
+          description: successful operation
+          $ref: "#/components/responses/JobResponse"
+        "403":
+          description: Invalid input
+        "404":
+          description: Job not found
+    delete:
+      tags:
+        - Job
+      summary: Delete a job
+      description: "Deletes the job permanently, this cannot be undone."
+      operationId: deleteJob
+      parameters:
+#         - name: api_key
+#           in: header
+#           required: false
+#           schema:
+#             type: string
+        - name: jobId
+          in: path
+          description: Job id to delete
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        "200":
+            description: successful operation
+            $ref: "#/components/responses/JobResponse"
+        "400":
+          description: Invalid ID supplied
+        "404":
+          description: Job not found
+security:
+  - bearerAuth: []  
+servers:
+  - url: https://api.hirestack.ai
+components:
+  securitySchemes:
+    bearerAuth:            # arbitrary name for the security scheme
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+  requestBodies:
+    Job:
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/Job"
+      description: Job object
+      required: true
+  responses:
+    JobResponse:
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/Job"
+      description: A job object
+    JobArrayResponse:
+      content:
+        application/json:
+          schema:
+            type: array
+            items:
+              $ref: "#/components/schemas/Job"
+      description: List of job objects
+  schemas:
+    Job:
+      type: object
+      x-expandableFields:
+        - workspace
+      required:
+        - id
+      properties:
+        id:
+          type: string
+          format: uuid
+        workspace:
+          $ref: "#/components/schemas/Workspace"
+        title:
+          type: string
+          example: Software Engineer
+        status:
+          $ref: "#/components/schemas/JobStatus"
+        experience:
+          type: number
+          format: int
+          maximum: 10
+        createdAt:
+          type: string
+          format: date-time
+        createdBy:
+          $ref: "#/components/schemas/WorkspaceUser"
+    JobStatus:
+      type: string
+      description: Status of the job
+      enum:
+        - draft
+        - active
+        - inactive
+        - deleted
+    Workspace:
+      type: object
+      required:
+        - id
+      properties:
+        id:
+          type: string
+          format: uuid
+    WorkspaceUser:
+      type: object
+      required:
+        - id
+      properties:
+        id:
+          type: string
+          format: uuid
+    ErrorResponse:
+      type: object
+      properties:
+        code:
+          type: string
+        reason:
+          type: string
+        message:
+          type: string
