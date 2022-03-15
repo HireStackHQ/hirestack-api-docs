@@ -7,7 +7,7 @@ import './App.css';
 function App() {
   return (
     <div className="App">
-      <API apiDescriptionUrl={'http://api.hirestack.ai/openapi.json'} />
+      <API apiDescriptionUrl={'https://api.hirestack.ai/openapi.json'} />
     </div>
   );
 }
