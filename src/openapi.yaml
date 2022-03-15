@@ -22,11 +22,12 @@ info:
     email: developer@hirestack.ai
     name: HireStack Developers
     x-twitter: hirestack_hq
+    url: 'https://hirestack.ai'
   license:
     name: MIT
     url: https://opensource.org/licenses/MIT
-  x-logo:
-    url: 'https://hirestack.ai/logo.png'
+  # x-logo:
+  #   url: 'https://hirestack.ai/logo.png'
 tags:
   - name: Job
     description: A job that an applicat will apply to
@@ -364,9 +365,27 @@ components:
           format: uuid
         workspace:
           $ref: "#/components/schemas/Workspace"
+        user:
+          $ref: "#/components/schemas/UserProfile"
         name:
           type: string
           example: Pepper Potts
+        createdAt:
+          type: string
+          format: date-time
+    UserProfile:
+      type: object
+      description: User profile
+      properties:
+        id:
+          type: string
+          format: uuid
+        email:
+          type: string
+          example: pepper.pots@gmail.com
+        icon:
+          type: string
+          format: url
     Workspace:
       type: object
       required:

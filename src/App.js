@@ -1,5 +1,5 @@
 import { API } from '@stoplight/elements';
-import openapi from './openapi.yaml'
+// import openapi from './openapi.yaml'
 
 import '@stoplight/elements/styles.min.css';
 import './App.css';
@@ -7,7 +7,7 @@ import './App.css';
 function App() {
   return (
     <div className="App">
-      <API apiDescriptionUrl={openapi} />
+      <API apiDescriptionUrl={'http://api.hirestack.ai/openapi.json'} />
     </div>
   );
 }
